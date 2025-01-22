@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title> Santa DeGyatt Simulator: Mormon Uprising </title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+
+    <!-- ICONS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- FONTS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DynaPuff">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sour+Gummy">
+
+    
+    <!-- include an external style sheet -->
+    <link rel="stylesheet" href="style.css">  
+    
+    <!-- include an external JavaScript file -->
+    <script src="myscript.js"></script>
+  </head>
+  
+  <body>
+    <div id="background">
+    
+      <div id="aura"><i class="fa fa-heart"></i>   Aura Level 0</div>
+      <div id="status"><i class="fa fa-comments"></i>   Status: Strangers</div>
+
+      <i class="fa fa-angle-left" id="left" onclick="next(-1)"></i>
+
+      <!--<div id="grid">-->
+        <div id="questions" onclick="moveOn()">
+          <div id="name"> Cameron </div>
+        </div>
+        <div id="character"><img src="images/0resting.webp" alt="placeholder" id="img"></div>
+        
+        <div id="options"></div>
+
+      <!--</div>-->
+
+      <i class="fa fa-angle-right" id="right" onclick="next(1)"></i>
+
+      <!--<div id="name"> Cameron </div>-->
+      
+      <div id="hint" onclick="showHint()"><i class="fa fa-lightbulb-o"></i></div>
+      <div id="menuBut" onclick="showMenu()"><i class="fa fa-cog"></i></div>
+      <div id="lightbox">
+        <div id="pic"></div>
+      </div>
+      
+
+    </div>
+    
+  </body>
+  
+</html>
