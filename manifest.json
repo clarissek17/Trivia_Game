@@ -21,7 +21,7 @@
     "lang":"en-US",
     "name":"Santa DeGyatt Simulator: Mormon Uprising",
     "short_name":"Santa DeGyatt Simulator: Mormon Uprising",
-    "start_url":"https://clarissek17.github.io/trivia_game",
+    "start_url":"/",
     "screenshots":[
         {
             "src": "screenshots/smallshot.png",

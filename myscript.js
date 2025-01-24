@@ -1,26 +1,20 @@
-/* TO DO
+/*
+PROGRAM: "Santa Degyatt Simulator: Mormon Uprising"
+AUTHOR: Clarisse
+Date: Last updated January 23rd, 2025
 
-- FETCH ERROR CONTINUE BUTTTON
-- achievement for unlocking married rank
-
-- make study edition (add own study questions)
-- fix the hitchhiker's guide to the galaxy error (quotation marks >:/ )
-
+Secret Bonus features to code later:
+- Continue buttom for fetch errors
+- Alert to tell user their relationship status changed
+- Achievement for unlocking married rank
+- Study edition (where you can your add own study questions)
+- Add a catch for the ugly looking quotation mark thing
+- feature to give each character several category options
 */
 
-/* * * * * * * * * * * * * * * * * * 
-WHEN ADDING ANOTHER PERSONA:
-- add array of 10 questions (with answer and options) to specialQ()
-- add case to specialQ()
-- 8 new images to images folder
-- flirt responses to flirt()
-- custom responses to rights and wrongs
-- change max number in next()
-- add three dialogue part "shy" intro
-- change number in onload for loops
-* * * * * * * * * * * * * * * * * * */
 
-// global variables
+/* GLOBAL VARIABLES*/
+// Elements
 let characterDiv;
 let nameDiv;
 let questionDiv;
@@ -30,7 +24,14 @@ let statusDiv;
 let picDiv;
 let hintDiv;
 let lightboxDiv;
+
+// API
 let data;
+let apiURL = "https://opentdb.com/api.php?amount=20";
+let pexelsURL = "https://api.pexels.com/v1/search?query=";
+let apiKey = "1cYKSXsNvhqi7Jj7dPdTuvZjjRO1r06OUW9qEByS6axGiixAyFRObC2m"; 
+
+// Variables
 let responded; // makes clicking the next box work
 let aura = []; // each index is user score with a different persona
 let level = []; // each index is user status with a different persona
@@ -41,18 +42,53 @@ let hintShowing; // if lightbox is on or off
 let doing; // if the user is doing trivia, custom q, or flirting, so program can display correct image in lightbox
 let introduced = []; // shows character's intro dialogue if false
 let isPos = []; // if the character and user have a postive relationship showing
-let upStats = [[],[],[],[],[]];
-let downStats = [[],[],[],[],[]];
-
-// trivia api
-let apiURL = "https://opentdb.com/api.php?amount=20";
-// pexels api
-let pexelsURL = "https://api.pexels.com/v1/search?query=";
-let apiKey = "1cYKSXsNvhqi7Jj7dPdTuvZjjRO1r06OUW9qEByS6axGiixAyFRObC2m";
+let upStats = [[],[],[],[],[]]; // list of positive relationship statuses
+let downStats = [[],[],[],[],[]]; // list of negative relationship statuses
 
 
-// Run this function when the page finishes loading
+/* PWA STUFF - Ms. Wear's code, NOT mine*/
+
+// load the service worker - Ms. Wear's code
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }, function(error) {
+        alert("App is offline. Some features may not work.");
+        console.log("App is offline. Some features may not work.")
+        console.log('Service Worker registration failed:', error);
+      });
+    });
+}  
+
+// handle install prompt - Ms. Wear's code
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installButton = document.getElementById('installButton');
+  installButton.style.display = 'block';
+
+  installButton.addEventListener('click', () => {
+    installButton.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+    });
+  });
+});                    
+
+
+/* FUNCTION RUNS WHEN WINDOW LOADS */
 window.onload = function() {
+
     // initialize variables
     characterDiv = document.getElementById("character");
     nameDiv = document.getElementById("name");
@@ -77,34 +113,26 @@ window.onload = function() {
         isPos[i] = true;
     } // for
 
-    // statuses
+    // relationship statuses
     upStats = [["Strangers", "Friends", "Situationship", "Dating", "Married"],["Strangers", "y'all are chill", "Friends", "Lab Partners", "Married"],["Strangers", "Fellow nerds", "Friends", "Dating", "Married"],["Strangers", "Aquaintances", "Friends", "Dating but without the dating part", "Married"],["Strangers", "\"no way i know that person!\"", "Friends", "Besties", "Married"]];
     downStats = [["Major Beef", "... not really friends anymore", "Ex-situationship???", "Exes", "Divorced"],["no lore", "y'all are not chill", "Just people", "Friends (ex-lab partners)", "Divorced"],["Irrelvant to each other", "Friends of friends", "Classmates", "Exes", "Divorced"],["Y'all have negative chemistry", "Mildy Aquainted", "Classmates", "JUST friends", "Divorced"],["NPCs", "Aquaintances", "Classmates", "Friends but there's drama?", "Divorced"]];
 
     // make it so lightbox is closed when clicked
-    //lightboxDiv.style.display = "none";
     lightboxDiv.onclick = function () {
         lightboxDiv.style.display = "none";
         hintShowing = false;
     };
 
-    // open menu to start
+    // open menu when game starts
     showMenu();
-
-    console.log("PERSONA = " + persona)
   
     // run fetch content to fill questions array
     fetchContent("10", "easy"); // runs cam's questions first
 
-    
-
-    // run fetch images to fill images array
-    //fetchImages("bird");
 } // window.onload
 
 
-// Function to fetch data from the API
-// Uses async/await for modern asynchronous code handling
+/* FETCHES DATA FROM THE TRIVIA API */
 async function fetchContent(category) {
     let response = null;
     let diff = "easy";
@@ -118,86 +146,63 @@ async function fetchContent(category) {
         diff = "easy";
     }
 
+    // fetch the data
     try {
         response = await fetch(apiURL + "&category=" + category + "&difficulty=" + diff);
 
         // Convert the response to JSON format
         data = await response.json();
-    
-        console.log(data);
-        console.log(data.results[q].question);
 
+        // run the game
         changeContent();
 
     } catch (error) {
-        // Handle errors that may occur while fetching data
+        // catch data detch errors
         console.error('Error fetching question:', error);
         alert("haha fetch error ¯\\_(ツ)_/¯");
     }
 } // fetchContent
 
 
-
-
-// fetches images
+/* FETCHES DATA FROM THE PEXELS API */
 async function fetchImages(query) {
     
+    // fetch the data
     try {
 
         let response = null;
-
-        console.log(query);
 
         // get better image for false in t/f questions
         if(query == "False"){
             query = "bad";
         } // if
 
-        console.log("new" + query);
-
-        //if(!query) return alert("please enter a keyword");
         response = await fetch(pexelsURL + query + "&per_page=1", {headers: {Authorization: apiKey}});
         let data = await response.json();
-        //const photo = data.photos[0];
 
-        console.log(data);
-        //console.log(photo);
+        // update the picture div
         picDiv.innerHTML = "<img src='" + data.photos[0].src.tiny + "' alt='image'>";
-        
 
-        /*
-        response = await fetch(pexelsURL);
-
-        // Convert the response to JSON format
-        let picData = await response.json();
-
-        console.log(picData);
-        //console.log(data.results[q].question);
-
-        //changeContent(data);
-        */
   } catch (error) {
+
     // show a default image
     picDiv.innerHTML = "<img src='images/nopic.webp' alt='image'>";
-    // Handle errors that may occur while fetching data
-    //console.error('Error fetching image:', error);
   }
     
 } // fetchImages
 
 
-// Function to update the content displayed on the page
+/* RUN THE GAME */
 function changeContent() {
 
     // variables
-    let threshold = [3, 14, 25, 36, 47];        // is 60 needed?   [5, 18, 32, 45, 60]; // currently set to playtest mode
+    let threshold = [5, 18, 32, 45, 60];        // [5, 18, 32, 45, 60] is for gameplay; [3, 14, 25, 36, 47] is for playtesting
 
-    console.log("lock in?")
-
-    // get new data is theres no more questions in array
+    // get new data if there are no more questions in data array
     if(q > data.results.length - 1){
         q = 0;
 
+        // get correct genre of question depending on person
         switch(persona){
             case 0:
                 fetchContent("10");
@@ -217,47 +222,35 @@ function changeContent() {
         }
     }
 
-    // aura[persona] > 71 && level[persona] == 4
-    // PLAYTESTING SECDUCE -- aura[persona]  == 2
-
-    if(aura[persona] > 60 && level[persona] == 4){              // set to 60 for playtest mode, and 71 for real play
+    // Determine which function to run
+    if(aura[persona] > 71 && level[persona] == 4){              // 71 for gameplay, 60 for playtesting, and 2 for testing winscreen
+        // player wins
         doing = "win";
         seduce();
     }else if(introduced[persona] == false){
+        // player meets new persona
         introduce(0);
     }else if(aura[persona] > threshold[f]){
+        // persona flirts with player
         doing = "flirt";
         flirt();
         f++;
-        // thing
-        // if aura[persona] > array[thing]
-        // call flirt()
-        // thing++
-
     } else if(q % 5 == 0 && q != 0){
+        // persona asks custom question
         doing = "custom"
         specialQ(q);
     } else{
+        // persona asks trivia question
         doing = "trivia";
         askTrivia();
     }
 
-    // if q is a special number
-    // detour --> custom question
-    // remember to q++
-    // else if aura is a special number
-    // detour --> flirt
-    // aura gets major bonus from points
-    // if u get the flirt correct, major upgrade (wifey, etc.)
-    // remember to q++
-
 } // changeContent
 
+
+/* PERSONA ASKS TRIVIA QUESTIONS */
 function askTrivia(){
-
     let options;
-
-    console.log("q is " + q);
 
     // Update the questiondiv
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ data.results[q].question;
@@ -266,12 +259,8 @@ function askTrivia(){
     characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='placeholder' id='img'>";
 
     
-    console.log(data.results[q].correct_answer)
-
-    // error check: answers from last question still appear
+    // Error check: delete answers from last question if they appear
     options = getAnswers();
-
-    console.log("options array: " + getAnswers() + options);
 
     if(options.length > 4){
 
@@ -284,7 +273,6 @@ function askTrivia(){
             options.shift();
             options.shift();
         }
-
 
     } // error check if
 
@@ -299,39 +287,32 @@ function askTrivia(){
         }
     }
 
-    //Update the pexelsdiv
-    //fetchImages("cat");
+    // program continues when user clicks div with optionsClicked()
 
 } // askTrivia
 
 
-// function to make an array of answers
+/* MAKE RANDOMIZED ARRAY OF OPTIONS */
 function getAnswers(){
 
-    // adds correct answer
+    // adds correct answer to array
     let options = [data.results[q].correct_answer];
 
-    // adds incorrect answers
+    // adds incorrect answers to array
     for(let option of data.results[q].incorrect_answers){
         options.push(option);
     } // for
 
-    /*// removes illegal characters (like quotation marks)
-    for(let elem of options){
-        if(elem.includes("&quot")){
-            elem.replace("&quot", "'");
-            console.log(elem)
-        } // if
-    } // for*/
-
     // sorts them alphabetically to randomize
     options.sort();
 
+    // return array
     return options;
+
 } // getAnswers
 
 
-// check if answer is right and tell user
+/* CHECK IF USER GOT ANSWER RIGHT */
 function optionClicked(option, isAnswer){
 
     // variables
@@ -339,20 +320,24 @@ function optionClicked(option, isAnswer){
     let customWrong = [["um... well not exactly :(", "No actually, it's...", "what."],["um... well not exactly :(", "No actually, it's...", "what."],["um... well not exactly :(", "No actually, it's...", "what."],["bro wut??","Is it? Cause's I thought it was something else... hmmm","Oh really? I didn't know that-- where did you learn that :|"],["no","bad","ugh"]];
     let rando =  Math.floor(Math.random() * (2 - 0 + 1)) + 0; // change depending on number of custom answers
 
-    // clear options
+    // remove the options on screen
     optionsDiv.innerHTML = "";
 
-
+    // change character
     if(option == "intro"){
+        // first introduction
         introduce(1);
     } else if(option == "transition"){
+        // reaction to introduction
         introduce(2);
     }else if(isAnswer){
+        // user is correct
         aura[persona]++;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customRight[persona][rando];
         characterDiv.innerHTML = "<img src='images/" + persona + "impressed.webp' alt='placeholder' id='img'>";
         console.log("correct");
     }else{
+        // user is incorrect
         aura[persona]--;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customWrong[persona][rando];
         characterDiv.innerHTML = "<img src='images/" + persona + "disappointed.webp' alt='placeholder' id='img'>";
@@ -361,25 +346,19 @@ function optionClicked(option, isAnswer){
 
     // Update the score (auraDiv)
     auraDiv.innerHTML = "<i class='fa fa-heart'></i>   Aura level " + aura[persona];
-    console.log("score: " + aura[persona]);
 
-    // allow user to move onto next question (done by clicking the question box)
+    // allow user to move onto next question
     responded = true;
 
-    // to move onto next question, user clicks box (the code below will be moved there)
-
-    // perhaps add a div tag that tells them this
-    
+    // program continues when user clicks div with moveOn()
 
 } // optionClicked
 
 
+/* CHECK IF USER GOT ANSWER RIGHT */
 function moveOn(){
 
-    console.log("clicked");
-    console.log(responded);
-
-
+    // check if player has rizzmaxxed this character
     if(doing == "win"){
         alert("oh... it seems you've rizzed " + nameDiv.innerHTML + " to the max. The real question is, can you pull them in real life, you CHRONICALLY ONLINE virgin");
         doing = "unknown";
@@ -389,9 +368,7 @@ function moveOn(){
         // set responded to false
         responded = false;
 
-        console.log(responded);
-
-        // add move on parts
+        // move on to next question
         q++;
 
         // call change content to give next question
@@ -403,7 +380,7 @@ function moveOn(){
 } // moveOn
 
 
-// gives the user a dating question
+/* PERSONA FLIRTS WITH USER */
 function flirt(){
 
     // variables
@@ -411,7 +388,7 @@ function flirt(){
     let permut = [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]];
     let rando = Math.floor(Math.random() * (6 - 1) ) + 1;
 
-    // 3 flirts per array -- INCREASE THIS NUMBER
+    // custom flirst for each persona
     let camFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
     let neoFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
     let natFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
@@ -437,74 +414,36 @@ function flirt(){
             break;
     } // switch
 
-
-
-    // THERE IS AN ERROR BELOW IF ARRAY RUNS OUT OF FLIRTS
-
-    // update the questiondiv
+    // update the questiondiv and character
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ flirts[level[persona]][0];
+
+    // update the character
     characterDiv.innerHTML = "<img src='images/" + persona + "flirtatious.webp' alt='placeholder' id='img'>";
 
-    
-    // Update the optionsdiv (can be randomized later with a permutation array)
-    console.log(permut[rando][0]);
-
-
+    // Update the optionsdiv (options are randomized with a permuation)
     optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][0] +")' id='choice'>" + flirts[level[persona]][(permut[rando][0])] + "</div>";
     optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][1] +")' id='choice'>" + flirts[level[persona]][(permut[rando][1])] + "</div>";
     optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][2] +")' id='choice'>" + flirts[level[persona]][(permut[rando][2])] + "</div>";
-   
-    /*
-    optionsDiv.innerHTML += "<div onclick='rizzBack(1)' id='choice'>" + flirts[level][1] + "</div>";
-    optionsDiv.innerHTML += "<div onclick='rizzBack(2)' id='choice'>" + flirts[level][2] + "</div>";
-    optionsDiv.innerHTML += "<div onclick='rizzBack(3)' id='choice'>" + flirts[level][3] + "</div>";
-    */
+
+    // program continues when user clicks div with rizzBack() function
 
 } // flirt
 
 
-// processes user response to flirt
+/* PERSONA RESPONDES TO USER FLIRTING BACK */
 function rizzBack(num){
-
-    // five upStats: strangers, aquainted, friends, friends ;), married
-    // cam          strangers, friends, situationship, dating, married
-    // neo          strangers, y'all are chill, friends, lab partner, married
-    // nat          strangers, fellow nerd, friends, dating, married
-
-    // five downStats:
-    // clar         she dgaf, mildy aquainted, classmates, just friends, divorced
-    // cam          opps, aquainted /neg, ex-situationship???, exes, divorced
-    // neo          dislikes each other, y'all are not chill, random people, ex-lab partner, divorced
-    // nat          he's lowkey annoyed, friends of friends, classmates, exes, divorced
-
-    // level
-
-    // if choice is correct, and upStat is showing, then upStat ++
-    // if choice is correct, and downStat is showing, show upStat
-    // if choice is bad, and upStat is showing, show downStat
-    // if choice is bad, and downStat is showing, downStat--
-    // if cant go further down, stays the same
-    // if choice is mid, stays the same
-
 
     // variables
     let responses = [[],[],[],[],[]];
-    //let statuses = ["Opps", "Strangers", "Acquaintances", "Friends", "Situationship", "Exes", "Dating", "Divorced", "Married"];
 
-    // 5 responses (cuz theres 5 flirts)
+    // 5 response arrays for each persona (cuz theres 5 flirts)
     let camRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
     let neoRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
     let natRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
     let claRes = [["Yes literally! We're actually locked in right now", ". . .", "let's go dude"],["I'm clarclar17... I can type it in for you", "yeah that's fair. All of my friends have a different free day and none of our schedules align :(", "You're really cool bro! Anyway--"],["you... um-- uh yeah okay lemme grab my bike outside", "oh womp womp. Ok, I guess...", "Yeah that's chill bro. Another time."],["Actually so real tho! Tax benefits, passports, citizenship; we're set. I'm your wife now.", "oh um I don't know. Allegations... I hear?", "Bro, every Challenge kid is married to the grind! That doesn't count. and Clam? haha no you don't need to worry about that--"],[";)", "Oh okay... byeeee!", "Awww c'mon... ok hop on Dress to Impress with me when you're home though"]];
     let anyRes = [["Yes literally! We're actually locked in right now", ". . .", "let's go dude"],["I can type it in for you", "yeah that's fair. All of my friends have a different free day... none of them sync up :(", "You're really cool bro! Anyway--"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
 
-
-    /*
-    // statuses
-    let upStats = [["strangers", "friends", "situationship", "dating", "married"],["strangers", "y'all are chill", "friends", "lab partners", "married"],["strangers", "fellow nerd", "friends", "dating", "married"],["strangers", "aquainted", "friends", "friends ;)", "married"],["strangers", "aquainted", "friends", "best friends", "married"]];
-    let downStats = [["opps", "aquainted /neg", "ex-situationship???", "exes", "divorced"],["dislikes each other", "y'all are not chill", "random people", "ex-lab partner", "divorced"],["he's lowkey annoyed", "friends of friends", "classmates", "exes", "divorced"],["she dgaf", "mildy aquainted", "classmates", "just friends", "divorced"],["she dgaf", "mildy aquainted", "classmates", "just friends", "divorced"]];
-    */
-
+    // fill responses array with responses
     switch(persona){
         case 0:
             convertArray(responses, camRes);
@@ -523,42 +462,10 @@ function rizzBack(num){
             break;
     }
 
-
-    // change above to a multidimensional array
-    // level ups jump by 2
-    // level downs go down by 1
-    // in an example array, start at strangers
-    // opps, strangers, acquaintances, friends, situationship, exes, dating, divorced, married
-    // for neo, could be like like partners or something 
-
-    // clear options
+    // clear options onscreen
     optionsDiv.innerHTML = "";
 
-    // give user points and change level
-    /*
-    if(num == 1){
-        aura[persona] += 10;
-        console.log("best");
-        questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][0];
-        characterDiv.innerHTML = "<img src='images/" + persona + "flustered.webp' alt='placeholder' id='img'>";
-        level[persona]++;
-    }else if(num == 2){
-        aura[persona] -= 10;
-        console.log("worst");
-        questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][1];
-        characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='placeholder' id='img'>";
-        if(level[persona] != 0){
-            level[persona]--;
-        }
-    }
-    else{
-        aura[persona]++;
-        console.log("no change");
-        questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][2];
-        characterDiv.innerHTML = "<img src='images/" + persona + "awkward.webp' alt='placeholder' id='img'>";
-    }*/
-
-    // give user points and change level
+    // Change persona based on user response:
 
     // below: correct choice and currently positive -- relationship upgrades
     if(num == 1 && isPos[persona]){
@@ -579,7 +486,6 @@ function rizzBack(num){
         aura[persona] -= 10;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][1];
         characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='placeholder' id='img'>";
-        console.log("huhhh")
         isPos[persona] = false;
     }// below: worst choice and currently negative -- relationship level downgrades
     else if(num == 2 && isPos[persona] == false){
@@ -592,57 +498,45 @@ function rizzBack(num){
     }// below: mid choice -- no changes
     else{
         aura[persona]++;
-        console.log("no change");
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][2];
         characterDiv.innerHTML = "<img src='images/" + persona + "awkward.webp' alt='placeholder' id='img'>";
     }
 
-
     // Update the score (auraDiv)
     auraDiv.innerHTML = "<i class='fa fa-heart'></i>   Aura level " + aura[persona];
-    console.log("score: " + aura[persona]);
 
-    /*// Update the level (status)
-    statusDiv.innerHTML = "Status: " + statuses[level[persona]] + ""; // ADD ICON HERE??? UWU
-    console.log(isPos)*/
-
+    // Update the relationship status
     if(isPos[persona]){
         statusDiv.innerHTML = "<i class='fa fa-comments'></i>   Status: " + upStats[persona][level[persona]];
-        console.log("code is very broken")
     } else{
         statusDiv.innerHTML = "<i class='fa fa-comments'></i>   Status: " + downStats[persona][level[persona]];
-        console.log("gurl u tripping")
     }
-
-
-    // perhaps add alert to tell user about the status change
 
     // allow user to move onto next question (done by clicking the question box)
     responded = true;
 
-    // to move onto next question, user clicks box
+    // program continues when user clicks div with moveOn() function
 
 } // rizzBack
 
+
+/* PERSONA ASKS CUSTOM QUESTION */
 function specialQ(q){
 
     // variables
     let customqs = [[],[],[],[],[],[],[],[],[],[]];
+    let rando = Math.floor(Math.random() * (4 - 2) ) + 2;
+    let words;
+    let query;
 
-    // 10 questions in array
+    // 10 custom questions in array
     let camArray = [["Which of these is not true?", "Trick question; all are true", "My name is Lightning Anderson", "I am 25 years old", "I know martial arts"], ["Which of these people do I look like?", "All of them", "Griffin Foster", "Napoleon Bonaparte", "Lightning Anderson"], ["In Beyblades, a Beyblade is used for what", "Parting the Red Sea", "Taking down the Twin Towers", "The murder of Abraham Lincoln", "The construction of the pyramids"], ["Who is Finch's mother?", "Kaolyn", "Mars", "Rosco", "Josephine"], ["In what town was Maximilien de Robespierre born in?", "Arras", "Paris", "Versailles", "Caen"], ["Which is a canonical ship?", "Eli x Finch", "Mars x Finch", "Mars x Kaolyn", "Kaolyn x Eli"], ["What year did the Dream SMP begin?", "2020", "2021", "2019", "2022"], ["Of the following, who is the bad guy?", "C!Dream", "C!Tommy", "C!Tubbo", "C!Ranboo"], ["What is C!Cameron's favourite color?", "Dusty Green", "Tyrian Purple", "Blood Red", "Periwinkle Blue"], ["What profession did Lightning fear he'd end up in?", "Businessman", "Lawyer", "Freelance Writer", "Engineer"]];
     let neoArray =[["Which of the following is the chemical group name used for organic molecules designed to look like animals:", "Enynenynols", "Animols", "Therides", "Zoanes"], ["How do purple gluesticks turn clear?", "Acid base neutralization", "Redox", "Haber-Bosch Process", "Hydrolysis"], ["Which of these is not a household ingredient used in methamphetamine production?", "Shampoo", "Gasoline", "Cough medicine", "Acetone"], ["How many mg of caffiene are in my favourite energy drink?", "180", "200", "460", "130"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"]];
     let natArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
     let claArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
     let anyArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
 
-    //let camArray = [["which of these is not a household ingredient used in methamphetamine production?", "shampoo", "gasoline", "cough medicine", "acetone"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["ton-618 is what?", "blackhole", "exoplanet", "ur mom", "mathematical constant"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"]];
-    //let neoArray = [["which of these is not a household ingredient used in methamphetamine production?", "shampoo", "gasoline", "cough medicine", "acetone"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["ton-618 is what?", "blackhole", "exoplanet", "ur mom", "mathematical constant"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"]];
-    //let natArray = [["which of these is not a household ingredient used in methamphetamine production?", "shampoo", "gasoline", "cough medicine", "acetone"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["ton-618 is what?", "blackhole", "exoplanet", "ur mom", "mathematical constant"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"],["which of these is not true?", "trick question all are true", "my namne is lightning", "i am 25 years old", "i know martial arts"]];
-    let rando = Math.floor(Math.random() * (4 - 2) ) + 2;
-    let words;
-    let query;
-
+    
     // fill customqs will questions specific to the persona
     switch(persona){
         case 0:
@@ -668,7 +562,6 @@ function specialQ(q){
     // Update the character
     characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='placeholder' id='img'>";
 
-    console.log("random number is" + rando)
     // Update the optionsdiv
     for(let i = 2; i < 5; i++){
         if(i == rando){
@@ -677,23 +570,19 @@ function specialQ(q){
         optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + customqs[(q / 5) - 1][i] + "\", false)' id='choice'>" + customqs[(q / 5) - 1][i] + "</div>";
     } // for
 
-    // know that this is flawed, as it cannot be the last option
-    // (add an if = 5 to solve, and increase rando max by 1)
+    // (potential edit to above-- add an if = 5 to solve, and increase rando max by 1 to enable last option)
 
     // find key hint in answer
     words = customqs[(q / 5) - 1][1].split(" ");
     query = words[words.length - 1];
 
-    console.log("custom" + query);
-
-    // change the image in the lightbox
-    console.log(query);
+    // change the hint image in the lightbox
     fetchImages(query);
-
 
 } // specialQ
 
-// loads current character's questions into customqs array
+
+/* LOAD PERSONA-SPECIFIC CONTENT INTO ARRAY */
 function convertArray(customqs, array){
 
     for(let i = 0; i < array.length; i++){
@@ -705,14 +594,14 @@ function convertArray(customqs, array){
 } // convertArray
 
 
+/* MAKE ARROW KEYS SWITCH PERSONAS */
 function next(change){
     let max = 4; // total number of personas -1
 
     if(doing != "flirt" && doing != "win"){
 
-        console.log(persona + " is the person")
-        console.log(change + "is the change")
 
+        // change persona
         if(persona == 0 && change == -1){
             persona = max;
             console.log("max "+ persona)
@@ -722,21 +611,17 @@ function next(change){
             persona += change;
         }
 
-        console.log(persona);
-
         // make sure aura level updates
         auraDiv.innerHTML = "<i class='fa fa-heart'></i>   Aura level " + aura[persona];
 
         // make sure status div updates
         if(isPos[persona]){
             statusDiv.innerHTML = "<i class='fa fa-comments'></i>   Status: " + upStats[persona][level[persona]];
-            console.log("code is very broken")
         } else{
             statusDiv.innerHTML = "<i class='fa fa-comments'></i>   Status: " + downStats[persona][level[persona]];
-            console.log("gurl u tripping")
         }
 
-        // add function call here (and maybe recheck status) to ensure smooth transition
+        // load questions of the persona's category
         switch(persona){
             case 0:
                 nameDiv.innerHTML = "Cameron";
@@ -759,30 +644,29 @@ function next(change){
                 fetchContent("17"); // sci for anya
                 break;
         }
-        
-        // later add feature to make it fetch from a variety of categories (aka pick a random category each time)
+
     } // if not doing flirt
 
 } // next
 
 
+/* SHOWS HINT IN LIGHTBOX FOR TRIVIA QUESTIONS */
 function showHint(){
 
-    console.log(doing)
-
     if(doing == "trivia"){
+
         // find key hint in answer
         let words = data.results[q].correct_answer.split(" ");
         let query = words[words.length - 1];
 
         // get image to match key hint
-        console.log(query);
         fetchImages(query);
     } else if(doing == "flirt"){
-        picDiv.innerHTML = "<img src='images/getrizzy.webp' alt='image'>";
-        
-    }
 
+        // show rizzy image if flirting
+        picDiv.innerHTML = "<img src='images/getrizzy.webp' alt='image'>";
+    }
+    // if program is running a custom question, the hint will already be in the lightbox
 
     // open lightbox
     if(!hintShowing){
@@ -792,6 +676,8 @@ function showHint(){
 
 } // showHint
 
+
+/* OPEN GAME MENU IN LIGHTBOX */
 function showMenu(){
 
     // add menu text
@@ -800,14 +686,6 @@ function showMenu(){
     `<br><br>As you correctly answer trivia questions, watch your aura grow. These students may just start flirting with you, so you better get rizzy. Can you become the ultimate Mormon, and marry them all?`+
     `<br><br>CONTROLS:<br>- click the dialogue box to move on<br>- click the options when they appear<br>- click the hint button for a visual clue<br>- click the arrows to meet new people`;
 
-/*
-    "<pre>\nwelcome \n- terrible catch phrase\n- blurb of the scene\n" + 
-    "\nexplanation\n- there's only one way to rizz them: prove you understand their hyperfixations fully.\n" + 
-    "- as you correctly answer trivia questions, watch your aura grow\n" + 
-    "- they may just start flirting with you... so be ready to get rizzy\n" + 
-    "- can you become the ultimate mormon, and marry them all?\n" + 
-    "\nCONTROLS\n- click the dialogue box to move on\n- click the options when they appear\n- click the hint button for a visual clue for the trivia questions\n\n[PLAY BUTTON]</pre>";
-*/
     // open lightbox
     if(!hintShowing){
         lightboxDiv.style.display = "block";
@@ -816,6 +694,8 @@ function showMenu(){
 
 } // showMenu
 
+
+/* RUN INTRODUCTION DIALOGUE IF PLAYER AND PERSONA HAVE NOT "MET" */
 function introduce(met){
 
     // variables
@@ -826,7 +706,7 @@ function introduce(met){
     characterDiv.innerHTML = "<img src='images/" + persona + "shy.webp' alt='placeholder' id='img'>";
 
     // change background
-    document.body.style.backgroundImage = "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/" + persona + "background.jpg')";
+    document.body.style.backgroundImage = "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/" + persona + "background.webp')";
 
     // show question
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ introArray[persona][met];    
@@ -844,17 +724,11 @@ function introduce(met){
 } // introduce
 
 
+/* SHOW WIN SCREEN IF PLAYER HAS RIZZMAXXED A PERSONA  */
 function seduce(){
-
-    // aura = 69,000,000
-    // status = ["WIFEYYYYY", "POOKIE"]
-    // question = ["oh..ok then ;)", ";)"]
-    // image = seduced
-    // alert -- it seems you've rizzed [name] to the max... why don't you try in person now?
 
     // variables
     let wins = [["WIFEYYYYY", ";)"],["WIFEYYYYY", ";)"],["WIFEYYYYY", ";)"],["WIFEYYYYY", ";)"],["WIFEYYYYY", ";)"]];
-
 
     // change aura div
     auraDiv.innerHTML = "<i class='fa fa-heart'></i>   Aura level 69,000,000";
@@ -867,8 +741,6 @@ function seduce(){
 
     // change image
     characterDiv.innerHTML = "<img src='images/" + persona + "seduced.webp' alt='placeholder' id='img'>";
-
-
 
 } // seduce
 
