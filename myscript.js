@@ -37,7 +37,7 @@ let aura = []; // each index is user score with a different persona
 let level = []; // each index is user status with a different persona
 let q; // question number
 let persona; // person ur talking to (0 is cam, 1 is neo, 2 is nathan, 3 is clarisse, 4 is anya, 5 to be eli, 6 to be lane, 7 to be gabby)
-let f; // number that increases aura threshold to unlock flirt
+let f = []; // number that increases aura threshold to unlock flirt
 let hintShowing; // if lightbox is on or off
 let doing; // if the user is doing trivia, custom q, or flirting, so program can display correct image in lightbox
 let introduced = []; // shows character's intro dialogue if false
@@ -100,7 +100,6 @@ window.onload = function() {
     responded = false;
     q = 0;
     persona = 0; // default
-    f = 0;
     hintShowing = false;
 
     // set all aurascores and status levels to zero (change i < number depending on number of personas)
@@ -109,6 +108,7 @@ window.onload = function() {
         level[i] = 0;
         introduced[i] = false;
         isPos[i] = true;
+        f[i] = 0;
     } // for
 
     // relationship statuses
@@ -228,11 +228,11 @@ function changeContent() {
     }else if(introduced[persona] == false){
         // player meets new persona
         introduce(0);
-    }else if(aura[persona] > threshold[f]){
+    }else if(aura[persona] > threshold[f[persona]]){
         // persona flirts with player
         doing = "flirt";
         flirt();
-        f++;
+        f[persona]++;
     } else if(q % 5 == 0 && q != 0){
         // persona asks custom question
         doing = "custom"
