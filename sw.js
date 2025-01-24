@@ -1,28 +1,26 @@
-const version = 'v131';  // change this everytime you update the service worker
-                          // to force the browser to also update it.
 
-/*self.addEventListener('install', function(event) {
+
+const version = 'v125';  // change this everytime you update the service worker
+                          // to force the browser to also update it.
+/*
+self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open('my-cache').then(function(cache) {
       return cache.addAll([
         '/',
-        'icons.json',
         'index.html',
-        'manifest.json',
-        'myscript.js',
         'style.css',
-        'icons/icon512_maskable.png',
-        'icons/icon512_rounded.png',
-        'images/0awkward.webp',
-        'images/0background.jpg',
-        'images/0disappointed.webp',
-        'images/0flirtatious.webp',
-        'images/0flustered.webp',
-        'images/0impressed.webp',
-        'images/0rejected.webp',
-        'images/0resting.webp',
-        'images/0seduced.webp',
-        'images/0shy.webp'
+        'apiexample.js',
+        'manifest.json',
+        'stars.jpg',
+        'icons/icon-48-48.png',
+        'icons/icon-72-72.png',
+        'icons/icon-96-96.png',
+        'icons/icon-144-144.png',
+        'icons/icon-192-192.png',
+        'icons/icon-512-512.png',
+        'screenshots/screenshot1.png',
+        'screenshots/screenshot2.png'
       ]);
     })
   );
@@ -42,27 +40,18 @@ const DYNAMIC_CACHE_NAME = 'my-app-dynamic-cache-v1';
 
 // Files to cache during install
 const STATIC_ASSETS = [
-    '/',
-    'icons.json',
-    'index.html',
-    'manifest.json',
-    'myscript.js',
-    'style.css',
-    'icons/icon512_maskable.png',
-    'icons/icon512_rounded.png',
-    'images/0awkward.webp',
-    'images/0background.webp',
-    'images/0disappointed.webp',
-    'images/0flirtatious.webp',
-    'images/0flustered.webp',
-    'images/0impressed.webp',
-    'images/0rejected.webp',
-    'images/0resting.webp',
-    'images/0seduced.webp',
-    'images/0shy.webp',
-    'images/favicon.ico',
-    'images/getrizzy.webp',
-    'images/nopic.webp'
+    '/tvmaze2/',
+    '/tvmaze2/index.html',
+    '/tvmaze2/style.css',
+    '/tvmaze2/apiexample.js',
+    '/tvmaze2/manifest.json',
+    '/tvmaze2/stars.jpg',
+    '/tvmaze2/icons/icon-48-48.png',
+    '/tvmaze2/icons/icon-72-72.png',
+    '/tvmaze2/icons/icon-96-96.png',
+    '/tvmaze2/icons/icon-144-144.png',
+    '/tvmaze2/icons/icon-192-192.png',
+    '/tvmaze2/icons/icon-512-512.png',
   // Add other static files you want to cache
 ];
 
@@ -105,6 +94,7 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         // If network fetch fails, fallback to cache
+        console.log("wifi is needed to perform action")
         return caches.match(event.request);
       })
   );
