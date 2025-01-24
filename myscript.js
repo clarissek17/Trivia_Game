@@ -54,8 +54,6 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
       }, function(error) {
-        alert("App is offline. Some features may not work.");
-        console.log("App is offline. Some features may not work.")
         console.log('Service Worker registration failed:', error);
       });
     });
@@ -335,13 +333,11 @@ function optionClicked(option, isAnswer){
         aura[persona]++;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customRight[persona][rando];
         characterDiv.innerHTML = "<img src='images/" + persona + "impressed.webp' alt='placeholder' id='img'>";
-        console.log("correct");
     }else{
         // user is incorrect
         aura[persona]--;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customWrong[persona][rando];
         characterDiv.innerHTML = "<img src='images/" + persona + "disappointed.webp' alt='placeholder' id='img'>";
-        console.log("incorrect");
     }
 
     // Update the score (auraDiv)
@@ -604,7 +600,6 @@ function next(change){
         // change persona
         if(persona == 0 && change == -1){
             persona = max;
-            console.log("max "+ persona)
         } else if(persona == max && change == 1){
             persona = 0
         } else{
