@@ -31,10 +31,10 @@
       <div id="aura"><i class="fa fa-heart"></i>   Aura Level 0</div>
       <div id="status"><i class="fa fa-comments"></i>   Status: Strangers</div>
 
-      <button id="installButton" style="display: none;">Install App</button>
-      <button id="fetchMore" onclick="fetchContent('10')"> Fetch Again </button>
+      <button id="installButton" style="display: none;" class="cursor">Install App</button>
+      <button id="fetchMore" onclick="fetchContent('10')" class="cursor"> Fetch Again </button>
 
-      <i class="fa fa-angle-left" id="left" onclick="next(-1)"></i>
+      <i class="fa fa-angle-left cursor2" id="left" onclick="next(-1)"></i>
 
       <div id="questions" onclick="moveOn()">
         <div id="name"> Cameron </div> <!-- change depending on default persona -->
@@ -44,10 +44,10 @@
         
       <div id="options"></div>
 
-      <i class="fa fa-angle-right" id="right" onclick="next(1)"></i>
+      <i class="fa fa-angle-right cursor2" id="right" onclick="next(1)" ></i>
       
-      <div id="hint" onclick="showHint()"><i class="fa fa-lightbulb-o"></i></div>
-      <div id="menuBut" onclick="showMenu()"><i class="fa fa-cog"></i></div>
+      <div id="hint" onclick="showHint()" class="cursor2"><i class="fa fa-lightbulb-o"></i></div>
+      <div id="menuBut" onclick="showMenu()" class="cursor2"><i class="fa fa-cog"></i></div>
 
       <div id="lightbox">
         <div id="pic"></div>

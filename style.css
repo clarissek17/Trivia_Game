@@ -27,6 +27,7 @@ body{
     border: paleturquoise solid thin;
     border-radius: 5px;
     font-family: "Sour Gummy", Arial;
+    z-index: 2;
 }
 
 #background{
@@ -84,11 +85,11 @@ body{
 
 #questions{
     padding: 4vh;
-    border: rgb(168, 35, 220) thick solid;
+    border: rgb(215, 62, 179) thick double;
     margin-left: 15vw;
     margin-right: 15vw;
     text-align: center;
-    background-color: rgba(168, 35, 220,0.5);
+    background-color: rgba(236, 54, 233, 0.5);
     bottom: 0;
     border-radius: 10px;
     order:3;
@@ -108,9 +109,9 @@ body{
 
 #choice{
     display: block;
-    border: rgb(168, 35, 220) thick solid;
+    border: rgb(215, 62, 179) thick double;
     padding: 2vh;
-    background-color: rgba(168, 35, 220,0.5);
+    background-color: rgba(236, 54, 233, 0.5);
     margin: 4px;
     margin-left: 1vw;
     margin-right: 1vw;
@@ -151,6 +152,16 @@ body{
     background-color:rgba(0,0,0,0.9); 
     display:none;
     z-index: 2;
+}
+
+.cursor:hover{
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.cursor2:hover{
+    transform: scale(1.2);
+    cursor: pointer;
 }
 
 @media only screen and (max-width: 900px) {

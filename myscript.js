@@ -4,7 +4,6 @@ AUTHOR: Clarisse
 Date: Last updated January 23rd, 2025
 
 Secret Bonus features to code later:
-- Continue buttom for fetch errors
 - Alert to tell user their relationship status changed
 - Achievement for unlocking married rank
 - Study edition (where you can your add own study questions)
@@ -254,7 +253,7 @@ function askTrivia(){
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ data.results[q].question;
 
     // Update the character
-    characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='placeholder' id='img'>";
+    characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='resting' id='img'>";
 
     
     // Error check: delete answers from last question if they appear
@@ -279,9 +278,9 @@ function askTrivia(){
     for(let option of options){
 
         if(option == data.results[q].correct_answer){
-            optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + option + "\", true)' id='choice'>" + option + "</div>";
+            optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + option + "\", true)' id='choice' class='cursor'>" + option + "</div>";
         }else{
-            optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + option + "\", false)' id='choice'>" + option + "</div>";
+            optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + option + "\", false)' id='choice' class='cursor'>" + option + "</div>";
         }
     }
 
@@ -332,19 +331,22 @@ function optionClicked(option, isAnswer){
         // user is correct
         aura[persona]++;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customRight[persona][rando];
-        characterDiv.innerHTML = "<img src='images/" + persona + "impressed.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "impressed.webp' alt='impressed' id='img'>";
     }else{
         // user is incorrect
         aura[persona]--;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customWrong[persona][rando];
-        characterDiv.innerHTML = "<img src='images/" + persona + "disappointed.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "disappointed.webp' alt='disappointed' id='img'>";
     }
 
     // Update the score (auraDiv)
     auraDiv.innerHTML = "<i class='fa fa-heart'></i>   Aura level " + aura[persona];
 
     // allow user to move onto next question
-    responded = true;
+    if(option != "intro" && option != "transition"){
+        responded = true;
+        questionDiv.className="cursor";
+    }
 
     // program continues when user clicks div with moveOn()
 
@@ -358,11 +360,12 @@ function moveOn(){
     if(doing == "win"){
         alert("oh... it seems you've rizzed " + nameDiv.innerHTML + " to the max. The real question is, can you pull them in real life, you CHRONICALLY ONLINE virgin");
         doing = "unknown";
-        optionsDiv.innerHTML += "<div onclick='next(1)' id='choice'> Okay um bye " + nameDiv.innerHTML + "! I'm gonna go real quick...</div>";
+        optionsDiv.innerHTML += "<div onclick='next(1)' id='choice' class='cursor'> Okay um bye " + nameDiv.innerHTML + "! I'm gonna go real quick...</div>";
     } else if(responded){// only run function if user has actually answered questions
 
         // set responded to false
         responded = false;
+        questionDiv.classList.remove("cursor");
 
         // move on to next question
         q++;
@@ -385,7 +388,7 @@ function flirt(){
     let rando = Math.floor(Math.random() * (6 - 1) ) + 1;
 
     // custom flirst for each persona
-    let camFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
+    let camFlirts = [["Do you like poetry, martial arts, drama, linguistics, visual art, MCYT, music, or English?", "Yeah OMG I loved your poem! Wanna see some of my art; it's of my silly lil OCs", "poetry? nah it's bad. Except Andrew Tate's stuff", "I don't really know anything about those"],["Um so... like... I like you. Wanna go out with me?", "Yes, I would love to.", "No, I don't like you", "So I like you, but I'm not really looking for that right now."],["[TIME SKIP-- Two dates later] So is this official?", "Wanna be my girlfriend?", "Is what official?", "Not sure if I'm ready for labels yet. Sorry."],["I love you so much I literally wanna marry you","Love you too you're literally my wifey","I don't really love you. I'm breaking up with you.","Girl? We're in high school."],["By the way, who was in the right? C!Tommy or C!Dream?","C!Tommy","C!Dream","I haven't seen the Dream SMP"]];
     let neoFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
     let natFlirts = [["Wow! We have a a lot in common you know", "Yeah we should hang out sometime", "not really", "yeah we show lowkey be friends"],["hey shawty, want my number?", "yes", "no", "um why"],["literally marry me. please. please?", "of course wifey", "no ew what", "i'm down but i've already got a wife if ur cool with that"],["placeholder flirt","best","worst","mid"],["placeholder flirt","best","worst","mid"]];
     let claFlirts = [["That's so cool. We're literally on the same wavelength right now!", "In sync girlie! We make a great duo", "*ignore her*", "ha yeah"],["We should hangout lowkey...", "Hell yeah! What's your discord?", "I'm too busy with my other friends", "Yeah sure"],["[TIMESKIP-- ANOTHER PARTY] You were up late on Discord last night Lol. What's poppin'? Wanna head to UVic after this?", "I've been chilling all day so I'm totally down for UVic. What do ya wanna do?", "No, I'm getting a ride home with my friend.","I'm so busy this week-- maybe another time"],["Screw romance, at this point we should just get married.","Yes, you're literally my wife. We have WAYYY more chemistry than ANY high school couple","Bro what? Who said we should get married?","Aren't you already married though?"],["Wow, it's getting late. Wanna stay over tonight?","Of course.","No, I'm going home","Sorry, I need to be home by 9:30-- I'll stay a little extra longer, though"]];
@@ -414,12 +417,12 @@ function flirt(){
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ flirts[level[persona]][0];
 
     // update the character
-    characterDiv.innerHTML = "<img src='images/" + persona + "flirtatious.webp' alt='placeholder' id='img'>";
+    characterDiv.innerHTML = "<img src='images/" + persona + "flirtatious.webp' alt='flirtatious' id='img'>";
 
     // Update the optionsdiv (options are randomized with a permuation)
-    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][0] +")' id='choice'>" + flirts[level[persona]][(permut[rando][0])] + "</div>";
-    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][1] +")' id='choice'>" + flirts[level[persona]][(permut[rando][1])] + "</div>";
-    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][2] +")' id='choice'>" + flirts[level[persona]][(permut[rando][2])] + "</div>";
+    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][0] +")' id='choice' class='cursor'>" + flirts[level[persona]][(permut[rando][0])] + "</div>";
+    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][1] +")' id='choice' class='cursor'>" + flirts[level[persona]][(permut[rando][1])] + "</div>";
+    optionsDiv.innerHTML += "<div onclick='rizzBack(" + permut[rando][2] +")' id='choice' class='cursor'>" + flirts[level[persona]][(permut[rando][2])] + "</div>";
 
     // program continues when user clicks div with rizzBack() function
 
@@ -433,7 +436,7 @@ function rizzBack(num){
     let responses = [[],[],[],[],[]];
 
     // 5 response arrays for each persona (cuz theres 5 flirts)
-    let camRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
+    let camRes = [["Thank you so much! I loved your poem too! Wait let me follow you on insta.", "Okay, what?", "Oh okay. I just thought you might like this one song."],["Are you free next Sunday? There's this cute cafe downtown.", "oh, um that's okay", "that's okay."],["Yes of course", "uh-- nevermind", "that's okay. yeah, I was just wondering"],["<3", "</3", "<3???"],["You're the best", "What the fuck. We're over.", "Oh yeah you should watch it. Actually-- maybe not. Maybe that needs to stay in 2020."]];
     let neoRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
     let natRes = [["Yes! I'll grab your number when my phone's handy.", "damn. screw you", "yeah."],["it's 123-456-7890", "oh... I'm sorry ok", "uhhh so we... how bout I just give it to you."],["i love you wifey", "i- it was a joke. i guess :(", "shiiii ok girl, um yeah that's fine"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"],["Thanks girlie! Ur my wife now", "bruh", "uh sure. whatever"]];
     let claRes = [["Yes literally! We're actually locked in right now", ". . .", "let's go dude"],["I'm clarclar17... I can type it in for you", "yeah that's fair. All of my friends have a different free day and none of our schedules align :(", "You're really cool bro! Anyway--"],["you... um-- uh yeah okay lemme grab my bike outside", "oh womp womp. Ok, I guess...", "Yeah that's chill bro. Another time."],["Actually so real tho! Tax benefits, passports, citizenship; we're set. I'm your wife now.", "oh um I don't know. Allegations... I hear?", "Bro, every Challenge kid is married to the grind! That doesn't count. and Clam? haha no you don't need to worry about that--"],[";)", "Oh okay... byeeee!", "Awww c'mon... ok hop on Dress to Impress with me when you're home though"]];
@@ -467,7 +470,7 @@ function rizzBack(num){
     if(num == 1 && isPos[persona]){
         aura[persona] += 10;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][0];
-        characterDiv.innerHTML = "<img src='images/" + persona + "flustered.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "flustered.webp' alt='flustered' id='img'>";
         if(level[persona] < 4){
             level[persona]++;
         }
@@ -475,19 +478,19 @@ function rizzBack(num){
     else if(num == 1 && isPos[persona] == false){
         aura[persona] += 10;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][0];
-        characterDiv.innerHTML = "<img src='images/" + persona + "flustered.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "flustered.webp' alt='flustered' id='img'>";
         isPos[persona] = true;
     }// below: worst choice and currently positive -- relationship goes negative
     else if(num == 2 && isPos[persona]){
         aura[persona] -= 10;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][1];
-        characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='rejected' id='img'>";
         isPos[persona] = false;
     }// below: worst choice and currently negative -- relationship level downgrades
     else if(num == 2 && isPos[persona] == false){
         aura[persona] -= 10;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][1];
-        characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "rejected.webp' alt='rejected' id='img'>";
         if(level[persona] != 0){
             level[persona]--;
         }
@@ -495,7 +498,7 @@ function rizzBack(num){
     else{
         aura[persona]++;
         questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ responses[level[persona]][2];
-        characterDiv.innerHTML = "<img src='images/" + persona + "awkward.webp' alt='placeholder' id='img'>";
+        characterDiv.innerHTML = "<img src='images/" + persona + "awkward.webp' alt='awkward' id='img'>";
     }
 
     // Update the score (auraDiv)
@@ -510,6 +513,7 @@ function rizzBack(num){
 
     // allow user to move onto next question (done by clicking the question box)
     responded = true;
+    questionDiv.className="cursor";
 
     // program continues when user clicks div with moveOn() function
 
@@ -527,10 +531,10 @@ function specialQ(q){
 
     // 10 custom questions in array
     let camArray = [["Which of these is not true?", "Trick question; all are true", "My name is Lightning Anderson", "I am 25 years old", "I know martial arts"], ["Which of these people do I look like?", "All of them", "Griffin Foster", "Napoleon Bonaparte", "Lightning Anderson"], ["In Beyblades, a Beyblade is used for what", "Parting the Red Sea", "Taking down the Twin Towers", "The murder of Abraham Lincoln", "The construction of the pyramids"], ["Who is Finch's mother?", "Kaolyn", "Mars", "Rosco", "Josephine"], ["In what town was Maximilien de Robespierre born in?", "Arras", "Paris", "Versailles", "Caen"], ["Which is a canonical ship?", "Eli x Finch", "Mars x Finch", "Mars x Kaolyn", "Kaolyn x Eli"], ["What year did the Dream SMP begin?", "2020", "2021", "2019", "2022"], ["Of the following, who is the bad guy?", "C!Dream", "C!Tommy", "C!Tubbo", "C!Ranboo"], ["What is C!Cameron's favourite color?", "Dusty Green", "Tyrian Purple", "Blood Red", "Periwinkle Blue"], ["What profession did Lightning fear he'd end up in?", "Businessman", "Lawyer", "Freelance Writer", "Engineer"]];
-    let neoArray =[["Which of the following is the chemical group name used for organic molecules designed to look like animals:", "Enynenynols", "Animols", "Therides", "Zoanes"], ["How do purple gluesticks turn clear?", "Acid base neutralization", "Redox", "Haber-Bosch Process", "Hydrolysis"], ["Which of these is not a household ingredient used in methamphetamine production?", "Shampoo", "Gasoline", "Cough medicine", "Acetone"], ["How many mg of caffiene are in my favourite energy drink?", "180", "200", "460", "130"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"]];
+    let neoArray =[["Which of the following is the chemical group name used for organic molecules designed to look like animals:", "Enynenynols", "Animols", "Therides", "Zoanes"], ["How do purple gluesticks turn clear?", "Acid base neutralization", "Redox", "Haber-Bosch Process", "Hydrolysis"], ["Which of these is not a household ingredient used in methamphetamine production?", "Shampoo", "Gasoline", "Cough medicine", "Acetone"], ["How many mg of caffiene are in my favourite energy drink?", "180", "200", "460", "130"], ["Which of these passports is the weakest?", "Iran", "Canada", "Taiwan", "United States"], ["What percent traditionalist am I according to IDR labs?", "3%", "47%", "48%", "23%"], ["The Haber process is the industrial process for making what?", "Ammonia", "Nitrogen", "Polyethlene", "Cocaine"], ["How do you solve a math equation?", "With ratio rules", "Quadratic Equation", "Listening during class", "Without consulation of the voices"], ["What does facetious mean?", "Flippant or superficial", "A voyeur", "That's not a word", "not autistic"], ["Which of these constitutes as a meal?", "Pistachios", "Half a croissant", "Energy drink", "All of them"]];
     let natArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
     let claArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
-    let anyArray = [["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"], ["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],["placeholder question?", "answer", "wrong option", "wrong option", "wrong option"],]
+    let anyArray = [["What do I consider a pass?", "105%", "100%", "96%", "87%"], ["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],["What do I consider a pass?", "105%", "100%", "96%", "87%"],]
 
     
     // fill customqs will questions specific to the persona
@@ -556,14 +560,14 @@ function specialQ(q){
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ customqs[(q / 5) - 1][0]; // number of questions in array
 
     // Update the character
-    characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='placeholder' id='img'>";
+    characterDiv.innerHTML = "<img src='images/" + persona + "resting.webp' alt='resting' id='img'>";
 
     // Update the optionsdiv
     for(let i = 2; i < 5; i++){
         if(i == rando){
-        optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + customqs[(q / 5) - 1][1] + "\", true)' id='choice'>" + customqs[(q / 5) - 1][1] + "</div>";
+        optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + customqs[(q / 5) - 1][1] + "\", true)' id='choice' class='cursor'>" + customqs[(q / 5) - 1][1] + "</div>";
         }
-        optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + customqs[(q / 5) - 1][i] + "\", false)' id='choice'>" + customqs[(q / 5) - 1][i] + "</div>";
+        optionsDiv.innerHTML += "<div onclick='optionClicked(\"" + customqs[(q / 5) - 1][i] + "\", false)' id='choice' class='cursor'>" + customqs[(q / 5) - 1][i] + "</div>";
     } // for
 
     // (potential edit to above-- add an if = 5 to solve, and increase rando max by 1 to enable last option)
@@ -698,7 +702,7 @@ function introduce(met){
     userIntros = [["hello Cameron, I'm Santa", "huh what?"],["hello Neo, I'm Santa", "huh what?"],["hello Nathan, I'm Santa", "huh what?"],["Oh Hii Clarisse", "huh what?"],["hello Anya, I'm Santa", "huh what?"]]
 
     // change character pose
-    characterDiv.innerHTML = "<img src='images/" + persona + "shy.webp' alt='placeholder' id='img'>";
+    characterDiv.innerHTML = "<img src='images/" + persona + "shy.webp' alt='shy' id='img'>";
 
     // change background
     document.body.style.backgroundImage = "linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/" + persona + "background.webp')";
@@ -708,11 +712,12 @@ function introduce(met){
 
     // introduce character
     if(met == 0){
-        optionsDiv.innerHTML = "<div onclick='optionClicked(\"" + "intro" + "\", true)' id='choice'>" + "hi, I'm Sana" + "</div>"; // potentially change this feature later
+        optionsDiv.innerHTML = "<div onclick='optionClicked(\"" + "intro" + "\", true)' id='choice' class='cursor'>" + "hi, I'm Sana" + "</div>"; // potentially change this feature later
     } else if(met == 1){
-        optionsDiv.innerHTML = "<div onclick='optionClicked(\"" + "transition" + "\", true)' id='choice'>" + "huh? what's up" + "</div>"; // potentially change this feature later
+        optionsDiv.innerHTML = "<div onclick='optionClicked(\"" + "transition" + "\", true)' id='choice' class='cursor'>" + "huh? what's up" + "</div>"; // potentially change this feature later
     } else{
         responded = true;
+        questionDiv.className="cursor";
         introduced[persona] = true;
     }
 
@@ -735,7 +740,7 @@ function seduce(){
     questionDiv.innerHTML = " <div id='name'>" + nameDiv.innerHTML + "</div>"+ wins[persona][1];
 
     // change image
-    characterDiv.innerHTML = "<img src='images/" + persona + "seduced.webp' alt='placeholder' id='img'>";
+    characterDiv.innerHTML = "<img src='images/" + persona + "seduced.webp' alt='seduced' id='img'>";
 
 } // seduce
 
